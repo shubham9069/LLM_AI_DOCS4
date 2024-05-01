@@ -1,0 +1,7 @@
+flask
+google-generativeai
+langchain
+Werkzeug
+diffusers
+torch
+json
