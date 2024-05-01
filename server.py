@@ -22,7 +22,7 @@ class JsonConverter:
 
 app = Flask(__name__)
 
-genai.configure(api_key="AIzaSyBc22wVVpuwKM3FK0zqqcOvuNbCV1eGi2Q")
+genai.configure(api_key="") 
 model = genai.GenerativeModel("gemini-pro")
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large")
