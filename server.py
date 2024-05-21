@@ -129,6 +129,11 @@ def hello():
     return response["answer"]
 
 
+@app.route("/health-check", methods=["GET"])
+def health_check():
+    return json.dumps({"google_api": os.getenv("GOOGLE_API_KEY")})
+
+
 @app.route("/image-prompt", methods=["POST"])
 def tentToImage():
     prompt = request.json["prompt"]
