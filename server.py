@@ -13,6 +13,8 @@ from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain_core.prompts import PromptTemplate
 import torch
 import json
+from flask import jsonify 
+from datetime import datetime
 
 
 class JsonConverter:
@@ -22,11 +24,10 @@ class JsonConverter:
 
 app = Flask(__name__)
 
-genai.configure(api_key="") 
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel("gemini-pro")
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large")
-vector_store = ""
 
 
 def get_document(filePath):
@@ -56,17 +57,20 @@ def get_vector_embedding(array_of_text, filename):
     return db
 
 
-def get_conversation_chain(question):
+def get_conversation_chain(question, file_name):
     # it form finding a similar data realted to question
+    vector_store = FAISS.load_local(
+        f"vectorDB/{file_name}", embeddings, allow_dangerous_deserialization=True
+    )
 
     # vector_context = vector_store.similarity_search(question)
     # context = ""
     # for text in vector_context:
     #     context += text.page_content
-
+    # print(context)
     llm = GoogleGenerativeAI(
         model="models/gemini-1.5-pro-latest",
-        google_api_key="AIzaSyBc22wVVpuwKM3FK0zqqcOvuNbCV1eGi2Q",
+        google_api_key=os.getenv("GOOGLE_API_KEY"),
     )
     template = """
     Answer the question using the given {context} and {chat_history}  
@@ -111,8 +115,17 @@ def get_image_generatiion(prompt):
 @app.route("/ask-question", methods=["POST"])
 def hello():
     question = request.json["question"]
-    response = get_conversation_chain(question)
-    print(response)
+    document = request.json["document"] 
+    if document == True:
+        filename = request.json["file_name"]
+    else:
+        filename = "default.pdf"
+    try:
+        response = get_conversation_chain(question,filename)
+
+    except Exception as e:
+        print(e)
+        return " "
     return response["answer"]
 
 
@@ -125,20 +138,18 @@ def tentToImage():
 
 @app.route("/upload-document", methods=["POST"])
 def uploadDocument():
-    global vector_store
     docs_pdf = request.files["docs"]
-    docs_pdf.save(os.path.join("document", secure_filename(docs_pdf.filename)))
-    path = f"{app.root_path}\document\{secure_filename(docs_pdf.filename)}"
-    
+    fileName = str(datetime.now().microsecond) + "-"+ docs_pdf.filename.replace(" ","_")       
+    docs_pdf.save(os.path.join("document", fileName))
+    path = f"{app.root_path}\document\{fileName}"
     # reading our document
     text = get_document(path)
     array_chunks = get_text_chunks(
         text,
     )
-    vector_store = get_vector_embedding(
-        array_chunks, secure_filename(docs_pdf.filename)
-    )
-    return "document upload successfully"
+    get_vector_embedding(array_chunks, fileName)
+        
+    return json.dumps({"fileName":fileName})
 
 
 if __name__ == "__main__":
