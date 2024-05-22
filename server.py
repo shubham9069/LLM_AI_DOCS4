@@ -2,19 +2,16 @@ from flask import Flask, request
 import google.generativeai as genai
 from langchain_community.document_loaders import PyPDFLoader
 import os
-from werkzeug.utils import secure_filename
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceInstructEmbeddings
 from langchain_google_genai import GoogleGenerativeAI
-from diffusers import StableDiffusionPipeline
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
 from langchain_core.prompts import PromptTemplate
-import torch
 import json
-from flask import jsonify 
 from datetime import datetime
+from flask_cors import CORS, cross_origin
 
 
 class JsonConverter:
@@ -23,7 +20,7 @@ class JsonConverter:
 
 
 app = Flask(__name__)
-
+CORS(app)
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel("gemini-pro")
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
@@ -95,23 +92,6 @@ Answer:
     return chain({"question": question})
 
 
-def get_image_generatiion(prompt):
-
-    model_id = "CompVis/stable-diffusion-v1-4"
-    pipe = StableDiffusionPipeline.from_pretrained(
-        model_id,
-        torch_dtype=torch.float16,
-        safety_checker=None,
-        requires_safety_checker=False,
-    )
-
-    pipe = pipe.to("cuda")
-    image = pipe("a photo of an astronaut riding a horse on mars").images[0]
-
-    image.save("astronaut_rides_horse.png")
-    return ""
-
-
 @app.route("/ask-question", methods=["POST"])
 def hello():
     question = request.json["question"]
@@ -125,21 +105,14 @@ def hello():
 
     except Exception as e:
         print(e)
-        return " "
+        return str(e)
     return response["answer"]
 
 
 @app.route("/health-check", methods=["GET"])
 def health_check():
+    
     return json.dumps({"google_api": os.getenv("GOOGLE_API_KEY")})
-
-
-@app.route("/image-prompt", methods=["POST"])
-def tentToImage():
-    prompt = request.json["prompt"]
-    response = get_image_generatiion(prompt)
-    return response
-
 
 @app.route("/upload-document", methods=["POST"])
 def uploadDocument():
