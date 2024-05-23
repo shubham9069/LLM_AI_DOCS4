@@ -4,7 +4,7 @@ from langchain_community.document_loaders import PyPDFLoader
 import os
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceInstructEmbeddings
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_google_genai import GoogleGenerativeAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import RetrievalQA, ConversationalRetrievalChain
@@ -21,10 +21,13 @@ class JsonConverter:
 
 app = Flask(__name__)
 CORS(app)
+if "GOOGLE_API_KEY" not in os.environ:
+    os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
+
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel("gemini-pro")
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-large")
+embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
 
 
 def get_document(filePath):
