@@ -12,6 +12,7 @@ from langchain_core.prompts import PromptTemplate
 import json
 from datetime import datetime
 from flask_cors import CORS, cross_origin
+from dotenv import load_dotenv, find_dotenv
 
 
 class JsonConverter:
@@ -21,6 +22,7 @@ class JsonConverter:
 
 app = Flask(__name__)
 CORS(app)
+load_dotenv(find_dotenv())
 if "GOOGLE_API_KEY" not in os.environ:
     os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 
@@ -134,4 +136,4 @@ def uploadDocument():
 
 
 if __name__ == "__main__":
-    app.run(port="5000", debug=True)
+    app.run(host='0.0.0.0',debug=True)
