@@ -1,7 +1,6 @@
-# LLM_AI_DOCS4
+# LLM_AI_DOCS4 (Document Analysis and Question Answering)
 
-# GPT4 Document Analysis and Question Answering
-# Live on Azure product for use cases:-
+# Live production deployment on Azure for use cases:-
 ```diff
 **api for upload document to train you model :-**
 
