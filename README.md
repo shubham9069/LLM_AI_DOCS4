@@ -2,6 +2,9 @@
 
 # GPT4 Document Analysis and Question Answering
 
+Pre-requisite:
+python >=3.9
+
 ## Description:
 This project leverages GPT-4 along with various tools and models such as Langchain for dependency parsing, FaaIse vector DB for semantic similarity, Google LLM model for language understanding, and Hugging Face for embeddings. It provides a robust system for document analysis and question answering.
 
