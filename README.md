@@ -1,8 +1,30 @@
 # LLM_AI_DOCS4
 
 # GPT4 Document Analysis and Question Answering
+# Live on Azure product for use cases:-
+```diff
+**api for upload document to train you model :-**
 
-Pre-requisite:
+
+URL:- http://azuremachine.koreacentral.cloudapp.azure.com:5000/upload-document<br>
+payload : docs: fileName.pdf (it should be pdf and file formate should be formData)<br>
+return :{<br>
+file_name :"993863-SDE.pdf  // put this file name into a below API<br>
+}<br>
+
+**api for ask question to Ai :-**
+
+URL:- http://azuremachine.koreacentral.cloudapp.azure.com:5000/ask-question<br>
+payload : {<br>
+  "question":"what is name of candidate ", // question to ask <br>
+  "document":true, // id its true then Ai will use a user data . if its false its use a global information source  <br>
+  "file_name":"993863-SDE.pdf" // if document:true the please mention the upload file name. in above api  file name are present in response <br>
+}<br>
+```
+
+
+
+# Pre-requisite:
 python >=3.9
 
 ## Description:
